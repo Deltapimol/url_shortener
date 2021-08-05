@@ -9,4 +9,5 @@
 
 Memcached is used as caching solution and it has its own container.
 The project has a docker-compose file having the API service and the memcached service.
-API Output screenshot:
+API Output screenshot: <br/>
+![alt text](https://github.com/Deltapimol/url_shortener_assignment/blob/master/screenshot/API_Request.PNG?raw=true)
