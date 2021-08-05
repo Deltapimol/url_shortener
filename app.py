@@ -1,11 +1,12 @@
 import uuid
 from flask import Flask, request, jsonify, make_response
+from pymemcache.client import base
 
 app = Flask(__name__)
 
 
-URL_MAPPINGS = dict()
 API_URL_PREFIX = "/api/v1"
+MEMCACHED_CLIENT = base.Client(('localhost', 11211))
 
 
 def random_string():
@@ -16,14 +17,15 @@ def random_string():
 def url_shortener():
     """URL Shortener View"""
     input_data =request.get_json()
-    print(input_data['url'])
     original_url = input_data['url']
-    if original_url in URL_MAPPINGS.keys():
-        return make_response(jsonify({"shortened_url":URL_MAPPINGS.get(original_url)}), 200)
-    else:
+    if MEMCACHED_CLIENT.get(original_url) is None:
         shortened_url = random_string()
-        URL_MAPPINGS[original_url] = shortened_url
+        MEMCACHED_CLIENT.set(original_url, shortened_url)
         return make_response(jsonify({"shortened_url":shortened_url}), 200)
+    else:
+        MEMCACHED_CLIENT.get(original_url)
+        return make_response(jsonify({"shortened_url":MEMCACHED_CLIENT.get(original_url)}), 200)
+    
         
 if __name__ == "__main__":
     app.run()
