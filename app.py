@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 API_URL_PREFIX = "/api/v1"
 MEMCACHED_CLIENT = base.Client(('memcached_container', 11211))
-
+SAMPLE_WEBSITE = "https://www.example.com/"
 
 def random_string():
     """Random string generator"""
@@ -22,7 +22,7 @@ def url_shortener():
     try:
         if validators.url(original_url) == True:
             if MEMCACHED_CLIENT.get(original_url) is None:
-                shortened_url = random_string()
+                shortened_url = SAMPLE_WEBSITE + random_string()
                 MEMCACHED_CLIENT.set(original_url, shortened_url)
                 return make_response(jsonify({"shortened_url":shortened_url}), 200)
             else:
