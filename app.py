@@ -19,16 +19,19 @@ def url_shortener():
     """URL Shortener View"""
     input_data =request.get_json()
     original_url = input_data['url']
-    if validators.url(original_url) == True:
-        if MEMCACHED_CLIENT.get(original_url) is None:
-            shortened_url = random_string()
-            MEMCACHED_CLIENT.set(original_url, shortened_url)
-            return make_response(jsonify({"shortened_url":shortened_url}), 200)
+    try:
+        if validators.url(original_url) == True:
+            if MEMCACHED_CLIENT.get(original_url) is None:
+                shortened_url = random_string()
+                MEMCACHED_CLIENT.set(original_url, shortened_url)
+                return make_response(jsonify({"shortened_url":shortened_url}), 200)
+            else:
+                shortened_url = MEMCACHED_CLIENT.get(original_url)
+                return make_response(jsonify({"shortened_url":shortened_url.decode("utf-8")}), 200)
         else:
-            shortened_url = MEMCACHED_CLIENT.get(original_url)
-            return make_response(jsonify({"shortened_url":shortened_url.decode("utf-8")}), 200)
-    else:
-        return make_response(jsonify({"ERROR":"Invalid URL"}), 400)
+            return make_response(jsonify({"ERROR":"Invalid URL"}), 400)
+    except Exception as e:
+        return make_response(jsonify({"ERROR":e}), 500)
         
 if __name__ == "__main__":
     app.run(host='0.0.0.0')

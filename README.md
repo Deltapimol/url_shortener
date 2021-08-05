@@ -7,3 +7,8 @@
 --header 'Content-Type: application/json' \ 
 --data-raw '{"url": "https://www.google.com"}'`
 **Sample response body :** `{"shortened_url": "3c6c02"}`
+
+
+Memcached is used as caching solution and it has its own container.
+The project has a docker-compose file having the API service and the memcached service.
+API Output screenshot:
