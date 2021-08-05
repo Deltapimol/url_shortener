@@ -1,0 +1,17 @@
+version: "3.3"
+services: 
+    api:
+      build:
+        context: .
+      container_name: api_container
+      command: >
+        sh -c "python app.py"
+      ports: 
+      - 5000:5000
+      depends_on: 
+        - memcached
+    memcached: 
+        image: memcached
+        container_name: memcached_container
+        ports:
+        - 11211:11211

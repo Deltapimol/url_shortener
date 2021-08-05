@@ -1,12 +1,13 @@
 import uuid
 from flask import Flask, request, jsonify, make_response
 from pymemcache.client import base
+import validators
 
 app = Flask(__name__)
 
 
 API_URL_PREFIX = "/api/v1"
-MEMCACHED_CLIENT = base.Client(('localhost', 11211))
+MEMCACHED_CLIENT = base.Client(('memcached_container', 11211))
 
 
 def random_string():
@@ -18,14 +19,16 @@ def url_shortener():
     """URL Shortener View"""
     input_data =request.get_json()
     original_url = input_data['url']
-    if MEMCACHED_CLIENT.get(original_url) is None:
-        shortened_url = random_string()
-        MEMCACHED_CLIENT.set(original_url, shortened_url)
-        return make_response(jsonify({"shortened_url":shortened_url}), 200)
+    if validators.url(original_url) == True:
+        if MEMCACHED_CLIENT.get(original_url) is None:
+            shortened_url = random_string()
+            MEMCACHED_CLIENT.set(original_url, shortened_url)
+            return make_response(jsonify({"shortened_url":shortened_url}), 200)
+        else:
+            shortened_url = MEMCACHED_CLIENT.get(original_url)
+            return make_response(jsonify({"shortened_url":shortened_url.decode("utf-8")}), 200)
     else:
-        MEMCACHED_CLIENT.get(original_url)
-        return make_response(jsonify({"shortened_url":MEMCACHED_CLIENT.get(original_url)}), 200)
-    
+        return make_response(jsonify({"ERROR":"Invalid URL"}), 400)
         
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0')
